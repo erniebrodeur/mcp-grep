@@ -12,6 +12,39 @@ from pytest_bdd import given, when, then, parsers
 from mcp.server.fastmcp import FastMCP
 from mcp_grep.server import grep
 
+# Store test results in module variables for fixtures to access
+_grep_result = None
+_grep_with_ignore_case_result = None
+_grep_with_context_result = None
+_grep_with_fixed_strings_result = None
+_grep_with_recursive_result = None
+_grep_with_max_count_result = None
+
+# Fixtures to share results between steps
+@pytest.fixture
+def invoke_grep_with_pattern():
+    return _grep_result
+
+@pytest.fixture
+def invoke_grep_with_ignore_case():
+    return _grep_with_ignore_case_result
+
+@pytest.fixture
+def invoke_grep_with_context():
+    return _grep_with_context_result
+
+@pytest.fixture
+def invoke_grep_with_fixed_strings():
+    return _grep_with_fixed_strings_result
+
+@pytest.fixture
+def invoke_grep_with_recursive():
+    return _grep_with_recursive_result
+
+@pytest.fixture
+def invoke_grep_with_max_count():
+    return _grep_with_max_count_result
+
 
 @pytest.fixture
 def mcp_server():
@@ -70,45 +103,63 @@ def directory_with_files(test_dir):
 
 
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and the file path'))
-async def invoke_grep_with_pattern(pattern, test_file):
+def when_invoke_grep(pattern, test_file):
     """Invoke grep with pattern and path."""
-    result = await grep(pattern=pattern, paths=test_file)
-    return json.loads(result)
+    global _grep_result
+    result = grep(pattern=pattern, paths=test_file)
+    _grep_result = json.loads(result)
+    return _grep_result
 
 
-@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and ignore_case={ignore_case:Boolean}'))
-async def invoke_grep_with_ignore_case(pattern, ignore_case, test_file):
+@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and ignore_case={ignore_case}'))
+def invoke_grep_with_ignore_case(pattern, ignore_case, test_file, bool_converter):
     """Invoke grep with pattern and ignore_case option."""
-    result = await grep(pattern=pattern, paths=test_file, ignore_case=ignore_case)
-    return json.loads(result)
+    # Convert string to boolean
+    global _grep_with_ignore_case_result
+    ignore_case = bool_converter(ignore_case)
+    result = grep(pattern=pattern, paths=test_file, ignore_case=ignore_case)
+    _grep_with_ignore_case_result = json.loads(result)
+    return _grep_with_ignore_case_result
 
 
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and before_context={before:d} and after_context={after:d}'))
-async def invoke_grep_with_context(pattern, before, after, test_file):
+def invoke_grep_with_context(pattern, before, after, test_file):
     """Invoke grep with pattern and context options."""
-    result = await grep(pattern=pattern, paths=test_file, before_context=before, after_context=after)
-    return json.loads(result)
+    global _grep_with_context_result
+    result = grep(pattern=pattern, paths=test_file, before_context=before, after_context=after)
+    _grep_with_context_result = json.loads(result)
+    return _grep_with_context_result
 
 
-@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and fixed_strings={fixed:Boolean}'))
-async def invoke_grep_with_fixed_strings(pattern, fixed, test_file):
+@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and fixed_strings={fixed}'))
+def invoke_grep_with_fixed_strings(pattern, fixed, test_file, bool_converter):
     """Invoke grep with pattern and fixed_strings option."""
-    result = await grep(pattern=pattern, paths=test_file, fixed_strings=fixed)
-    return json.loads(result)
+    global _grep_with_fixed_strings_result
+    # Convert string to boolean
+    fixed = bool_converter(fixed)
+    result = grep(pattern=pattern, paths=test_file, fixed_strings=fixed)
+    _grep_with_fixed_strings_result = json.loads(result)
+    return _grep_with_fixed_strings_result
 
 
-@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and recursive={recursive:Boolean}'))
-async def invoke_grep_with_recursive(pattern, recursive, test_dir):
+@when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and recursive={recursive}'))
+def invoke_grep_with_recursive(pattern, recursive, test_dir, bool_converter):
     """Invoke grep with pattern and recursive option."""
-    result = await grep(pattern=pattern, paths=test_dir, recursive=recursive)
-    return json.loads(result)
+    global _grep_with_recursive_result
+    # Convert string to boolean
+    recursive = bool_converter(recursive)
+    result = grep(pattern=pattern, paths=test_dir, recursive=recursive)
+    _grep_with_recursive_result = json.loads(result)
+    return _grep_with_recursive_result
 
 
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and max_count={max_count:d}'))
-async def invoke_grep_with_max_count(pattern, max_count, test_file):
+def invoke_grep_with_max_count(pattern, max_count, test_file):
     """Invoke grep with pattern and max_count option."""
-    result = await grep(pattern=pattern, paths=test_file, max_count=max_count)
-    return json.loads(result)
+    global _grep_with_max_count_result
+    result = grep(pattern=pattern, paths=test_file, max_count=max_count)
+    _grep_with_max_count_result = json.loads(result)
+    return _grep_with_max_count_result
 
 
 @then(parsers.parse('I should receive results with {count:d} matching line'))

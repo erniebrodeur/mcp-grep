@@ -58,7 +58,7 @@ def grep_info() -> str:
     return json.dumps(get_grep_info(), indent=2)
 
 @mcp.tool()
-async def grep(
+def grep(
     pattern: str,
     paths: Union[str, List[str]],
     ignore_case: bool = False,

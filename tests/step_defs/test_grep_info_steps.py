@@ -28,6 +28,13 @@ def request_grep_info():
     return json.loads(result)
 
 
+@pytest.fixture
+def request_grep_info():
+    """Fixture for grep info resource."""
+    result = grep_info()
+    return json.loads(result)
+
+
 @then('I should receive grep binary metadata as JSON')
 def check_json_metadata(request_grep_info):
     """Check that the result is valid JSON metadata."""
