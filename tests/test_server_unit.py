@@ -1,4 +1,8 @@
-"""Tests for the MCP server implementation."""
+"""Unit tests for the MCP server implementation.
+
+These tests provide fast unit-level testing of the server components.
+For functional tests, see the BDD tests in test_features.py.
+"""
 
 import json
 import os
