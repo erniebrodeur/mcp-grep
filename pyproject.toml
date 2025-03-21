@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     {name = "Ernie Brodeur", email = "ebrodeur@ujami.net"}
 ]
-license = {text = "MIT"}
+license = {text = "GPL 3.0+"}
 requires-python = ">=3.8"
 dependencies = [
     "mcp"  # The official Model Context Protocol Python SDK
