@@ -61,7 +61,7 @@ print(result)
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/mcp-grep.git
+git clone https://github.com/erniebrodeur/mcp-grep.git
 cd mcp-grep
 
 # Install in development mode

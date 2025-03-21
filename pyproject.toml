@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "MCP Grep Server"
 readme = "README.md"
 authors = [
-    {name = "Eric Brodeur", email = "example@example.com"}
+    {name = "Ernie Brodeur", email = "ebrodeur@ujami.net"}
 ]
 license = {text = "MIT"}
 requires-python = ">=3.8"
