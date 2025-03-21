@@ -1,8 +1,4 @@
-    # Check if any path is a directory and set recursive flag if needed
-    for path in paths:
-        if os.path.isdir(path):
-            recursive = True
-            break"""MCP Server implementation for grep functionality using system grep binary."""
+"""MCP Server implementation for grep functionality using system grep binary."""
 
 from pathlib import Path
 import json
@@ -93,11 +89,7 @@ def grep(
     else:
         paths = [os.path.expanduser(p) for p in paths]
         
-    # Check if any path is a directory and set recursive flag if needed
-    for path in paths:
-        if os.path.isdir(path):
-            recursive = True
-            break
+    # Let grep handle directories according to the recursive flag
     
     # Find grep binary
     grep_path = shutil.which("grep")
