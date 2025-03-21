@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mcp-grep"
 version = "0.1.0"
-description = "Grep tool that uses Model Context Protocol"
+description = "MCP Grep Server"
 readme = "README.md"
 authors = [
     {name = "Eric Brodeur", email = "example@example.com"}
@@ -13,13 +13,10 @@ authors = [
 license = {text = "MIT"}
 requires-python = ">=3.8"
 dependencies = [
-    "click>=8.0.0",
-    "rich>=10.0.0",
-    "mcp>=1.2.0",
+    "mcp"  # The official Model Context Protocol Python SDK
 ]
 
 [project.scripts]
-mcp-grep = "mcp_grep.cli:main"
 mcp-grep-server = "mcp_grep.server:mcp.run"
 
 [project.optional-dependencies]
