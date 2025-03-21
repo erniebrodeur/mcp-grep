@@ -1,4 +1,8 @@
-"""MCP Server implementation for grep functionality using system grep binary."""
+    # Check if any path is a directory and set recursive flag if needed
+    for path in paths:
+        if os.path.isdir(path):
+            recursive = True
+            break"""MCP Server implementation for grep functionality using system grep binary."""
 
 from pathlib import Path
 import json
@@ -83,14 +87,30 @@ def grep(
     Returns:
         JSON string with search results
     """
-    # Convert single path to list
+    # Convert single path to list and expand user paths
     if isinstance(paths, str):
-        paths = [paths]
+        paths = [os.path.expanduser(paths)]
+    else:
+        paths = [os.path.expanduser(p) for p in paths]
+        
+    # Check if any path is a directory and set recursive flag if needed
+    for path in paths:
+        if os.path.isdir(path):
+            recursive = True
+            break
     
     # Find grep binary
     grep_path = shutil.which("grep")
     if not grep_path:
-        return json.dumps({"error": "grep binary not found in PATH"})
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": "grep binary not found in PATH"
+                }
+            ],
+            "isError": True
+        }
     
     # Build command
     cmd = [grep_path]
@@ -116,110 +136,70 @@ def grep(
     cmd.append(pattern)
     cmd.extend(paths)
     
-    results = []
-    
     try:
         # Execute grep
         process = subprocess.run(cmd, text=True, capture_output=True)
         
         # Parse output
         if process.returncode not in [0, 1]:  # 0=match found, 1=no match
-            return json.dumps({
-                "error": f"grep failed with code {process.returncode}",
-                "stderr": process.stderr
-            })
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"grep failed with code {process.returncode}\n{process.stderr}"
+                    }
+                ],
+                "isError": True
+            }
         
-        # Process stdout if we have results
+        # Parse results into clean JSON
+        results = []
         if process.stdout:
-            output_lines = process.stdout.splitlines()
-            
-            # Track context lines
-            current_file = None
-            matches = []
-            context_lines = []
-            separator_indices = []
-            
-            # Find separator lines (--) for context
-            for i, line in enumerate(output_lines):
-                if line == "--":
-                    separator_indices.append(i)
-            
-            # Process each line
-            for i, line in enumerate(output_lines):
-                # Skip separators
-                if i in separator_indices:
-                    continue
-                
-                if ":" in line:  # Normal grep output format is "file:line:content"
-                    parts = line.split(":", 2)
+            for line in process.stdout.splitlines():
+                # Handle normal grep output (not context lines or separators)
+                if line != "--" and ":" in line:  # Skip separators and ensure we have a match
+                    parts = line.split(':', 2)
                     if len(parts) >= 3:
-                        file_path, line_num_str, content = parts
-                        
-                        # Check if this is a context line (usually prefixed)
-                        is_match = True
-                        if content.startswith("-"):
-                            is_match = False
-                            content = content[1:]
-                        
-                        # Add to results
-                        if is_match:
-                            matches.append({
-                                "file": file_path,
-                                "line_num": int(line_num_str),
-                                "line": content,
-                                "is_match": True
-                            })
-                        else:
-                            context_lines.append({
-                                "file": file_path,
-                                "line_num": int(line_num_str),
-                                "line": content,
-                                "is_match": False
-                            })
-            
-            # Group results by file
-            file_results = {}
-            for item in matches + context_lines:
-                file_path = item["file"]
-                if file_path not in file_results:
-                    file_results[file_path] = []
-                file_results[file_path].append(item)
-            
-            # Sort and format results
-            for file_path, lines in file_results.items():
-                # Sort by line number
-                lines.sort(key=lambda x: x["line_num"])
-                
-                # Group by match with its context
-                result_with_context = []
-                current_match = None
-                
-                for line in lines:
-                    if line["is_match"]:
-                        if current_match:
-                            result_with_context.append(current_match)
-                        current_match = {
+                        file_path, line_num, content = parts
+                        results.append({
                             "file": file_path,
-                            "line_num": line["line_num"],
-                            "line": line["line"],
-                            "context": []
-                        }
-                    elif current_match:
-                        current_match["context"].append({
-                            "line_num": line["line_num"],
-                            "line": line["line"],
-                            "is_match": False
+                            "line_num": int(line_num),
+                            "line": content
                         })
-                
-                if current_match:
-                    result_with_context.append(current_match)
-                
-                results.extend(result_with_context)
+        
+        # No results case
+        if not results and process.returncode == 1:
+            return {
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "No matches found"
+                    }
+                ],
+                "isError": False
+            }
     
     except Exception as e:
-        return json.dumps({"error": str(e)})
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": f"Error executing grep: {str(e)}"
+                }
+            ],
+            "isError": True
+        }
     
-    return json.dumps(results, indent=2)
+    results_json = json.dumps(results, indent=2)
+    return {
+        "content": [
+            {
+                "type": "text",
+                "text": results_json
+            }
+        ],
+        "isError": False
+    }
 
 if __name__ == "__main__":
     # Run the server with stdio transport for MCP
