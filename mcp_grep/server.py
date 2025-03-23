@@ -122,7 +122,7 @@ def grep(
         cmd.append("-r")
     
     # Common options we always want
-    cmd.extend(["--line-number", "--color=never"])
+    cmd.extend(["--line-number", "--color=never", "--with-filename"])
     
     # Add pattern and paths
     cmd.append(pattern)
@@ -153,9 +153,16 @@ def grep(
                     parts = line.split(':', 2)
                     if len(parts) >= 3:
                         file_path, line_num, content = parts
+                        try:
+                            # Try to convert line_num to integer, but catch errors
+                            line_num_value = int(line_num)
+                        except ValueError:
+                            # If conversion fails, keep it as a string
+                            line_num_value = line_num
+                        
                         results.append({
                             "file": file_path,
-                            "line_num": int(line_num),
+                            "line_num": line_num_value,
                             "line": content
                         })
         
@@ -182,16 +189,32 @@ def grep(
             "isError": True
         }
     
-    results_json = json.dumps(results, indent=2)
-    return {
-        "content": [
-            {
-                "type": "text",
-                "text": results_json
-            }
-        ],
-        "isError": False
-    }
+    # Truncate results if there are too many matches to avoid response size issues
+    MAX_RESULTS = 50
+    if len(results) > MAX_RESULTS:
+        truncated_results = results[:MAX_RESULTS]
+        truncated_message = f"Found {len(results)} matches, showing first {MAX_RESULTS}."
+        results_json = json.dumps(truncated_results, indent=2)
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": truncated_message + "\n\n" + results_json
+                }
+            ],
+            "isError": False
+        }
+    else:
+        results_json = json.dumps(results, indent=2)
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": results_json
+                }
+            ],
+            "isError": False
+        }
 
 if __name__ == "__main__":
     # Run the server with stdio transport for MCP
