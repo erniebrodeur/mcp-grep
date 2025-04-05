@@ -444,3 +444,51 @@ def verify_equal_context_lines(count, grep_results):
             f"Expected {count} or fewer lines before, got {len(match_with_context['before_context'])}"
         assert len(match_with_context["after_context"]) <= count, \
             f"Expected {count} or fewer lines after, got {len(match_with_context['after_context'])}"
+
+
+# Alternative step definition for two-text results with exact wording match
+@then('the results should contain "apple123" and "apple789"')
+def verify_results_contain_apple_results(grep_results):
+    """Verify results contain apple123 and apple789."""
+    found_apple123 = False
+    found_apple789 = False
+    
+    for result in grep_results["results"]:
+        # Handle various result formats
+        line = result.get("line", "")
+        if "match" in result and "line" in result["match"]:
+            line = result["match"]["line"]
+            
+        if "apple123" in line:
+            found_apple123 = True
+        if "apple789" in line:
+            found_apple789 = True
+    
+    assert found_apple123, "Text 'apple123' not found in any result"
+    assert found_apple789, "Text 'apple789' not found in any result"
+
+
+# Alternative step definition for three-text results with exact wording match
+@then('the results should contain "banana", "orange", and "grape"')
+def verify_results_contain_fruit_results(grep_results):
+    """Verify results contain banana, orange, and grape."""
+    found_banana = False
+    found_orange = False
+    found_grape = False
+    
+    for result in grep_results["results"]:
+        # Handle various result formats
+        line = result.get("line", "")
+        if "match" in result and "line" in result["match"]:
+            line = result["match"]["line"]
+            
+        if "banana" in line:
+            found_banana = True
+        if "orange" in line:
+            found_orange = True
+        if "grape" in line:
+            found_grape = True
+    
+    assert found_banana, "Text 'banana' not found in any result"
+    assert found_orange, "Text 'orange' not found in any result"
+    assert found_grape, "Text 'grape' not found in any result"
