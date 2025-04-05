@@ -15,6 +15,9 @@ MCP-Grep runs as a server that can be used by MCP-compatible clients:
 ```bash
 # Start the MCP-Grep server
 mcp-grep-server
+
+# Or use the MCP Inspector for interactive debugging and testing
+mcp-grep-inspector
 ```
 
 The server exposes the following MCP functionality:
@@ -32,6 +35,8 @@ The server exposes the following MCP functionality:
   - Maximum match count
   - Fixed string matching (non-regex)
   - Recursive directory searching
+- Natural language prompt understanding for easier use with LLMs
+- Interactive debugging and testing through MCP Inspector
 
 ## Example API Usage
 
@@ -56,6 +61,48 @@ result = client.use_tool("grep", {
 })
 print(result)
 ```
+
+## Natural Language Prompts
+
+MCP-Grep understands natural language prompts, making it easier to use with LLMs. Examples:
+
+```
+# Basic search
+Search for 'error' in log.txt
+
+# Case-insensitive search
+Find all instances of 'WARNING' regardless of case in system.log
+
+# With context lines
+Search for 'exception' in error.log and show 3 lines before and after each match
+
+# Recursive search
+Find all occurrences of 'deprecated' in the src directory and its subdirectories
+
+# Fixed string search (non-regex)
+Search for the exact string '.*' in config.js
+
+# Limited results
+Show me just the first 5 occurrences of 'TODO' in the project files
+
+# Multiple options
+Find 'password' case-insensitively in all .php files, show 2 lines of context, and limit to 10 results
+```
+
+## MCP Inspector Integration
+
+MCP-Grep includes an MCP Inspector integration for interactive debugging and testing:
+
+```bash
+# Start the MCP Inspector with MCP-Grep
+mcp-grep-inspector
+```
+
+This opens a web-based UI where you can:
+- Explore available resources and tools
+- Test grep operations with different parameters
+- View formatted results
+- Debug issues with your grep queries
 
 ## Development
 

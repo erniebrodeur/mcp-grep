@@ -1,17 +1,3 @@
-"""
-Configuration for pytest.
-"""
-from pathlib import Path
-
-def pytest_bdd_apply_tag(tag, function):
-    """Apply tag to test function."""
-    return None
-
-def pytest_configure(config):
-    """Configure pytest-bdd."""
-    # Register fixtures used across multiple steps 
-    config.addinivalue_line("markers", "grep: mark test as a grep test")
-
 """Common fixtures for all step definitions."""
 
 import os
@@ -21,12 +7,6 @@ import shutil
 from pathlib import Path
 from pytest_bdd import given, when, then, parsers
 from mcp_grep.core import MCPGrep
-
-
-# Re-export steps from the step definition files
-from tests.step_defs.test_grep_tool_steps import *
-from tests.step_defs.test_grep_info_steps import *
-from tests.step_defs.test_client_prompts_steps import *
 
 
 @pytest.fixture

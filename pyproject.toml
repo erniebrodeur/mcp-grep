@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 mcp-grep-server = "mcp_grep.server:mcp.run"
+mcp-grep-inspector = "mcp_grep.inspector:run_inspector"
 
 [project.optional-dependencies]
 dev = [
