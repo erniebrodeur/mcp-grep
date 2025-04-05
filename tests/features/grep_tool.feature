@@ -49,7 +49,7 @@ Feature: Grep Tool Functionality
     When I invoke the grep tool with pattern "apple\d+" and regexp=True
     Then I should receive results with 2 matching lines
     And the results should contain "apple123" and "apple789"
-    
+
   Scenario: Inverted match search
     Given I'm connected to the MCP grep server
     And a file with content "apple\nbanana\norange\ngrape"

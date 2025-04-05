@@ -51,11 +51,14 @@ def connected_to_server(mcp_connection):
 @given(parsers.parse('a file with content "{content}"'))
 def create_test_file(content, test_file_path):
     """Create a test file with specified content."""
+    # Replace escaped newlines with actual newlines
+    actual_content = content.replace('\\n', '\n')
+    
     # Create the file with the specified content
     with open(test_file_path, 'w', encoding='utf-8') as f:
-        f.write(content)
+        f.write(actual_content)
     
-    return content
+    return actual_content
 
 
 @given("a directory with multiple files containing the word \"secret\"")
@@ -127,55 +130,19 @@ def invoke_grep_with_pattern_and_ignore_case(pattern, test_file_path, grep_resul
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and before_context={before:d} and after_context={after:d}'))
 def invoke_grep_with_context(pattern, before, after, test_file_path, grep_results):
     """Invoke grep with context lines."""
-    # Use the basic MCPGrep implementation
-    grep = MCPGrep(pattern)
+    # Use the MCPGrep implementation with context settings
+    grep = MCPGrep(
+        pattern=pattern, 
+        before_context=before, 
+        after_context=after
+    )
     
     # Perform the search
-    raw_results = list(grep.search_file(test_file_path))
-    
-    # Add context lines manually (since this feature might not be fully implemented yet)
-    matches_with_context = []
-    
-    with open(test_file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    
-    for result in raw_results:
-        line_num = result['line_num']
-        
-        # Create a context object
-        context = {
-            "match": result,
-            "before_context": [],
-            "after_context": []
-        }
-        
-        # Add before context
-        start_line = max(1, line_num - before)
-        for j in range(start_line, line_num):
-            line_idx = j - 1  # Convert to 0-based indexing for the list
-            if line_idx < len(lines):
-                context["before_context"].append({
-                    "file": result['file'],
-                    "line_num": j,
-                    "line": lines[line_idx].rstrip('\n')
-                })
-        
-        # Add after context
-        end_line = min(line_num + after + 1, len(lines) + 1)
-        for j in range(line_num + 1, end_line):
-            line_idx = j - 1  # Convert to 0-based indexing for the list
-            if line_idx < len(lines):
-                context["after_context"].append({
-                    "file": result['file'],
-                    "line_num": j,
-                    "line": lines[line_idx].rstrip('\n')
-                })
-        
-        matches_with_context.append(context)
+    results = list(grep.search_file(test_file_path))
     
     # Store results for verification
-    grep_results["results"] = matches_with_context
-    grep_results["match_count"] = len(matches_with_context)
+    grep_results["results"] = results
+    grep_results["match_count"] = len(results)
 
 
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and fixed_strings=True'))
@@ -252,27 +219,14 @@ def invoke_grep_with_regexp(pattern, test_file_path, grep_results):
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and invert_match=True'))
 def invoke_grep_with_invert_match(pattern, test_file_path, grep_results):
     """Invoke grep with inverted matching."""
-    grep = MCPGrep(pattern)
+    grep = MCPGrep(pattern, invert_match=True)
     
-    # Read all lines to enable inverted matching
-    with open(test_file_path, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-    
-    # For inverted matching, collect lines that don't match the pattern
-    inverted_results = []
-    for i, line in enumerate(lines, 1):
-        line = line.rstrip('\n')
-        if not grep.pattern.search(line) and line.strip():
-            inverted_results.append({
-                "file": test_file_path,
-                "line_num": i,
-                "line": line,
-                "matches": []
-            })
+    # Perform the search with proper invert_match flag
+    results = list(grep.search_file(test_file_path))
     
     # Store results for verification
-    grep_results["results"] = inverted_results
-    grep_results["match_count"] = len(inverted_results)
+    grep_results["results"] = results
+    grep_results["match_count"] = len(results)
 
 
 @when(parsers.parse('I invoke the grep tool with pattern "{pattern}" and line_number=False'))
