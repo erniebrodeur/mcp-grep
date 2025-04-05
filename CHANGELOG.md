@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - Development Branch
 
 ### Added
+
+- Improved testing
 - MCP Inspector integration (`mcp_grep.inspector`)
 - New command-line entry point: `mcp-grep-inspector`
 - Web-based UI for interactive debugging and testing of the MCP-Grep server
