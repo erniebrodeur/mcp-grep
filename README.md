@@ -1,9 +1,19 @@
 # MCP-Grep
+[![smithery badge](https://smithery.ai/badge/@erniebrodeur/mcp-grep)](https://smithery.ai/server/@erniebrodeur/mcp-grep)
 
 A grep server implementation that exposes grep functionality through the Model Context Protocol (MCP).
 
 ## Installation
 
+### Installing via Smithery
+
+To install Grep Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@erniebrodeur/mcp-grep):
+
+```bash
+npx -y @smithery/cli install @erniebrodeur/mcp-grep --client claude
+```
+
+### Manual Installation
 ```bash
 pip install mcp-grep
 ```
